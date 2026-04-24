@@ -58,7 +58,6 @@
     .logo-area img {
       width: 200px;
       mix-blend-mode: screen;
-      /* Ideal para remover fundos escuros/brancos em contextos específicos */
       filter: brightness(1.2);
     }
 
@@ -99,10 +98,16 @@
       color: #fff;
       font-size: 1rem;
       outline: none;
+      transition: border-color 0.2s;
     }
 
     input:focus {
       border-color: var(--primary);
+    }
+
+    input.input-error {
+      border-color: #ef4444 !important;
+      background: rgba(239, 68, 68, 0.1);
     }
 
     .btn-calc {
@@ -204,6 +209,58 @@
       font-weight: 700;
       width: 100%;
     }
+
+    /* Modal de Erro de Validação */
+    .modal-erro-content {
+      background: #fff;
+      color: #1e293b;
+      width: 90%;
+      max-width: 360px;
+      padding: 35px;
+      border-radius: 30px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .modal-erro-content i {
+      font-size: 3rem;
+      color: #ef4444;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .modal-erro-content h2 {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #dc2626;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .modal-erro-content p {
+      font-size: 0.95rem;
+      color: #475569;
+      line-height: 1.5;
+    }
+
+    .btn-erro-close {
+      margin-top: 22px;
+      padding: 12px 25px;
+      background: #ef4444;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 700;
+      width: 100%;
+      font-size: 0.95rem;
+      transition: 0.2s;
+    }
+
+    .btn-erro-close:hover {
+      background: #dc2626;
+    }
   </style>
 </head>
 
@@ -218,24 +275,25 @@
     <div class="input-section">
       <div class="label-group"><i class="fas fa-edit"></i> PROVAS AVP</div>
       <div class="grid">
-        <input type="number" id="avp1" placeholder="AVP 1" step="0.1">
-        <input type="number" id="avp2" placeholder="AVP 2" step="0.1">
+        <input type="number" id="avp1" placeholder="AVP 1" step="0.1" min="0" max="10" oninput="validarInput(this)">
+        <input type="number" id="avp2" placeholder="AVP 2" step="0.1" min="0" max="10" oninput="validarInput(this)">
       </div>
     </div>
 
     <div class="input-section">
       <div class="label-group"><i class="fas fa-tasks"></i> TRABALHOS TDE</div>
       <div class="grid">
-        <input type="number" id="tde1" placeholder="TDE 1">
-        <input type="number" id="tde2" placeholder="TDE 2">
-        <input type="number" id="tde3" placeholder="TDE 3">
-        <input type="number" id="tde4" placeholder="TDE 4">
+        <input type="number" id="tde1" placeholder="TDE 1" min="0" max="10" oninput="validarInput(this)">
+        <input type="number" id="tde2" placeholder="TDE 2" min="0" max="10" oninput="validarInput(this)">
+        <input type="number" id="tde3" placeholder="TDE 3" min="0" max="10" oninput="validarInput(this)">
+        <input type="number" id="tde4" placeholder="TDE 4" min="0" max="10" oninput="validarInput(this)">
       </div>
     </div>
 
     <button class="btn-calc" onclick="calcular()">CALCULAR MÉDIA</button>
   </div>
 
+  <!-- Modal resultado -->
   <div class="modal-overlay" id="overlay" onclick="fecharModal()">
     <div class="modal-content" onclick="event.stopPropagation()">
       <div id="modal-icon"></div>
@@ -251,8 +309,44 @@
     </div>
   </div>
 
+  <!-- Modal de erro de validação -->
+  <div class="modal-overlay" id="overlayErro" onclick="fecharModalErro()">
+    <div class="modal-erro-content" onclick="event.stopPropagation()">
+      <i class="fas fa-exclamation-triangle"></i>
+      <h2>Nota Inválida</h2>
+      <p>As notas devem ser números entre <strong>0</strong> e <strong>10</strong>.<br>Por favor, corrija os campos destacados em vermelho.</p>
+      <button class="btn-erro-close" onclick="fecharModalErro()">ENTENDIDO</button>
+    </div>
+  </div>
+
   <script>
+    function validarInput(el) {
+      const val = parseFloat(el.value);
+      if (el.value !== '' && (isNaN(val) || val < 0 || val > 10)) {
+        el.classList.add('input-error');
+      } else {
+        el.classList.remove('input-error');
+      }
+    }
+
     function calcular() {
+      const ids = ['avp1', 'avp2', 'tde1', 'tde2', 'tde3', 'tde4'];
+      let temErro = false;
+
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        const val = parseFloat(el.value);
+        if (el.value !== '' && (isNaN(val) || val < 0 || val > 10)) {
+          el.classList.add('input-error');
+          temErro = true;
+        }
+      });
+
+      if (temErro) {
+        document.getElementById('overlayErro').style.display = 'flex';
+        return;
+      }
+
       const getV = (id) => parseFloat(document.getElementById(id).value) || 0;
       const n1 = getV('avp1');
       const n2 = getV('avp2');
@@ -289,11 +383,7 @@
         statusTxt.innerText = "Avaliação Final (AVF)";
         statusTxt.style.color = "#d97706";
 
-        // Lógica de nota mínima necessária (Média + Prova)/2 = 5 -> Prova = 10 - Media
         let necessariaRaw = 10 - media;
-
-        // ARREDONDAMENTO DE MEIO EM MEIO PONTO (SEMPRE PARA CIMA)
-        // Exemplo: 3.1 vira 3.5 | 3.6 vira 4.0
         let necessariaArredondada = Math.ceil(necessariaRaw * 2) / 2;
 
         avfDiv.style.display = 'block';
@@ -309,6 +399,10 @@
 
     function fecharModal() {
       document.getElementById('overlay').style.display = 'none';
+    }
+
+    function fecharModalErro() {
+      document.getElementById('overlayErro').style.display = 'none';
     }
   </script>
 </body>
