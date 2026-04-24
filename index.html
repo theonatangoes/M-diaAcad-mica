@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UniFAP | Simulador de Média Acadêmica</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --primary: #004571;
+      --accent: #E30613;
+      --bg: #0f172a;
+      --card-bg: rgba(30, 41, 59, 0.7);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      background-image: radial-gradient(at 0% 0%, rgba(0, 69, 113, 0.5) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(227, 6, 19, 0.2) 0px, transparent 50%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      color: #fff;
+    }
+
+    /* Container Principal */
+    .container {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      width: 100%;
+      max-width: 450px;
+      padding: 40px;
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      text-align: center;
+      transition: filter 0.3s ease;
+    }
+
+    /* Logo sem fundo branco usando blend-mode */
+    .logo-area {
+      background: transparent;
+      margin-bottom: 20px;
+    }
+
+    .logo-area img {
+      width: 200px;
+      mix-blend-mode: screen;
+      /* Ideal para remover fundos escuros/brancos em contextos específicos */
+      filter: brightness(1.2);
+    }
+
+    h1 {
+      font-size: 1.2rem;
+      margin-bottom: 25px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .input-section {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .label-group {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #cbd5e1;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: var(--primary);
+    }
+
+    .btn-calc {
+      width: 100%;
+      padding: 16px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: 0.3s;
+    }
+
+    .btn-calc:hover {
+      background: #005a94;
+      transform: scale(1.02);
+    }
+
+    /* Pop-up (Modal) */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: #fff;
+      color: #1e293b;
+      width: 90%;
+      max-width: 400px;
+      padding: 35px;
+      border-radius: 30px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popIn {
+      from {
+        transform: scale(0.8);
+        opacity: 0;
+      }
+
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .modal-content i {
+      font-size: 3.5rem;
+      margin-bottom: 15px;
+    }
+
+    .res-media {
+      font-size: 3.5rem;
+      font-weight: 900;
+      color: var(--primary);
+      margin: 5px 0;
+    }
+
+    .status-badge {
+      font-weight: 800;
+      text-transform: uppercase;
+      font-size: 0.9rem;
+      margin-bottom: 15px;
+      display: block;
+    }
+
+    .avf-info {
+      background: #fef3c7;
+      padding: 15px;
+      border-radius: 15px;
+      color: #92400e;
+      font-size: 0.9rem;
+      margin-top: 15px;
+      border: 1px solid #fde68a;
+    }
+
+    .btn-close {
+      margin-top: 25px;
+      padding: 12px 25px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 700;
+      width: 100%;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container" id="mainContainer">
+    <div class="logo-area">
+      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRc-V3qzqoyjqzv6-AmwTlzZmoc3D02Az1-9g&s" alt="UniFAP">
+    </div>
+    <h1>Simulador de Média Acadêmica</h1>
+
+    <div class="input-section">
+      <div class="label-group"><i class="fas fa-edit"></i> PROVAS AVP</div>
+      <div class="grid">
+        <input type="number" id="avp1" placeholder="AVP 1" step="0.1">
+        <input type="number" id="avp2" placeholder="AVP 2" step="0.1">
+      </div>
+    </div>
+
+    <div class="input-section">
+      <div class="label-group"><i class="fas fa-tasks"></i> TRABALHOS TDE</div>
+      <div class="grid">
+        <input type="number" id="tde1" placeholder="TDE 1">
+        <input type="number" id="tde2" placeholder="TDE 2">
+        <input type="number" id="tde3" placeholder="TDE 3">
+        <input type="number" id="tde4" placeholder="TDE 4">
+      </div>
+    </div>
+
+    <button class="btn-calc" onclick="calcular()">CALCULAR MÉDIA</button>
+  </div>
+
+  <div class="modal-overlay" id="overlay" onclick="fecharModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div id="modal-icon"></div>
+      <span style="font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase;">Média Final</span>
+      <div class="res-media" id="modal-nota">0.0</div>
+      <span class="status-badge" id="modal-status">Status</span>
+
+      <div id="avp-necessaria" class="avf-info" style="display: none;">
+        <p id="avf-text"></p>
+      </div>
+
+      <button class="btn-close" onclick="fecharModal()">VOLTAR</button>
+    </div>
+  </div>
+
+  <script>
+    function calcular() {
+      const getV = (id) => parseFloat(document.getElementById(id).value) || 0;
+      const n1 = getV('avp1');
+      const n2 = getV('avp2');
+      const tdes = [getV('tde1'), getV('tde2'), getV('tde3'), getV('tde4')];
+
+      let somaTDE = 0;
+      tdes.forEach(n => somaTDE += (n / 10) * 0.5);
+
+      let media = (n1 * 0.4) + (n2 * 0.4) + somaTDE;
+
+      // Arredondamento principal (Theo Natan): >= 0.8 sobe pro inteiro
+      if (media % 1 >= 0.799) media = Math.ceil(media);
+
+      mostrarResultado(media);
+    }
+
+    function mostrarResultado(media) {
+      const overlay = document.getElementById('overlay');
+      const notaTxt = document.getElementById('modal-nota');
+      const statusTxt = document.getElementById('modal-status');
+      const iconDiv = document.getElementById('modal-icon');
+      const avfDiv = document.getElementById('avp-necessaria');
+      const avfText = document.getElementById('avf-text');
+
+      notaTxt.innerText = media.toFixed(1);
+      avfDiv.style.display = 'none';
+
+      if (media >= 7) {
+        iconDiv.innerHTML = '<i class="fas fa-check-circle" style="color: #10b981;"></i>';
+        statusTxt.innerText = "Aprovado Direto";
+        statusTxt.style.color = "#059669";
+      } else if (media >= 4) {
+        iconDiv.innerHTML = '<i class="fas fa-exclamation-circle" style="color: #f59e0b;"></i>';
+        statusTxt.innerText = "Avaliação Final (AVF)";
+        statusTxt.style.color = "#d97706";
+
+        // Lógica de nota mínima necessária (Média + Prova)/2 = 5 -> Prova = 10 - Media
+        let necessariaRaw = 10 - media;
+
+        // ARREDONDAMENTO DE MEIO EM MEIO PONTO (SEMPRE PARA CIMA)
+        // Exemplo: 3.1 vira 3.5 | 3.6 vira 4.0
+        let necessariaArredondada = Math.ceil(necessariaRaw * 2) / 2;
+
+        avfDiv.style.display = 'block';
+        avfText.innerHTML = `Para passar na AVF, você precisa tirar no mínimo: <br><b style="font-size: 1.4rem;">${necessariaArredondada.toFixed(1)}</b>`;
+      } else {
+        iconDiv.innerHTML = '<i class="fas fa-times-circle" style="color: #ef4444;"></i>';
+        statusTxt.innerText = "Reprovado Direto";
+        statusTxt.style.color = "#dc2626";
+      }
+
+      overlay.style.display = 'flex';
+    }
+
+    function fecharModal() {
+      document.getElementById('overlay').style.display = 'none';
+    }
+  </script>
+</body>
+
+</html>
