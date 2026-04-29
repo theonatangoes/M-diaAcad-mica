@@ -36,7 +36,6 @@
       color: #fff;
     }
 
-    /* Container Principal */
     .container {
       background: var(--card-bg);
       backdrop-filter: blur(12px);
@@ -50,7 +49,6 @@
       transition: filter 0.3s ease;
     }
 
-    /* Logo sem fundo branco usando blend-mode */
     .logo-area {
       background: transparent;
       margin-bottom: 20px;
@@ -111,6 +109,12 @@
       background: rgba(239, 68, 68, 0.1);
     }
 
+    /* AVP2 input destacado quando no modo "saber nota" */
+    input#avp2.input-hint {
+      border-color: #f59e0b;
+      background: rgba(245, 158, 11, 0.08);
+    }
+
     .btn-calc {
       width: 100%;
       padding: 16px;
@@ -119,6 +123,7 @@
       border: none;
       border-radius: 14px;
       font-weight: 800;
+      font-size: 1rem;
       cursor: pointer;
       margin-top: 10px;
       transition: 0.3s;
@@ -129,7 +134,36 @@
       transform: scale(1.02);
     }
 
-    /* Pop-up (Modal) */
+    .btn-avp2 {
+      width: 100%;
+      padding: 16px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 14px;
+      font-weight: 800;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-avp2:hover {
+      background: #005a94;
+      transform: scale(1.02);
+    }
+
+    .btn-avp2.visible {
+      display: flex;
+    }
+
+    /* Modal overlay */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -211,7 +245,110 @@
       width: 100%;
     }
 
-    /* Modal de Erro de Validação */
+    /* Modal de nota mínima AVP2 */
+    .modal-avp2-content {
+      background: #fff;
+      color: #1e293b;
+      width: 90%;
+      max-width: 400px;
+      padding: 35px;
+      border-radius: 30px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .modal-avp2-content .avp2-header-icon {
+      font-size: 3rem;
+      margin-bottom: 10px;
+    }
+
+    .modal-avp2-content .avp2-label {
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .modal-avp2-content .avp2-nota {
+      font-size: 4rem;
+      font-weight: 900;
+      margin: 4px 0 2px;
+    }
+
+    .modal-avp2-content .avp2-sublabel {
+      font-size: 0.82rem;
+      color: #64748b;
+      margin-bottom: 16px;
+    }
+
+    /* Caixas de cenário (passa / AVF / reprova) */
+    .cenario-box {
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-size: 0.85rem;
+      margin-top: 10px;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+    }
+
+    .cenario-box.aprovado {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid #6ee7b7;
+    }
+
+    .cenario-box.avf {
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fde68a;
+    }
+
+    .cenario-box.reprovado {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fca5a5;
+    }
+
+    .cenario-box i {
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    /* Quando é impossível passar direto */
+    .impossivel-box {
+      background: #fee2e2;
+      border: 1px solid #fca5a5;
+      border-radius: 14px;
+      padding: 14px;
+      color: #991b1b;
+      font-size: 0.9rem;
+      margin-top: 8px;
+    }
+
+    .btn-avp2-close {
+      margin-top: 22px;
+      padding: 12px 25px;
+      background: #f59e0b;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 700;
+      width: 100%;
+      font-size: 0.95rem;
+      transition: 0.2s;
+    }
+
+    .btn-avp2-close:hover {
+      background: #d97706;
+    }
+
+    /* Modal de erro */
     .modal-erro-content {
       background: #fff;
       color: #1e293b;
@@ -276,7 +413,7 @@
     <div class="input-section">
       <div class="label-group"><i class="fas fa-edit"></i> PROVAS AVP</div>
       <div class="grid">
-        <input type="number" id="avp1" placeholder="AVP 1" step="0.1" min="0" max="10" oninput="validarInput(this)">
+        <input type="number" id="avp1" placeholder="AVP 1" step="0.1" min="0" max="10" oninput="validarInput(this); verificarBotaoAVP2()">
         <input type="number" id="avp2" placeholder="AVP 2" step="0.1" min="0" max="10" oninput="validarInput(this)">
       </div>
     </div>
@@ -284,33 +421,47 @@
     <div class="input-section">
       <div class="label-group"><i class="fas fa-tasks"></i> TRABALHOS TDE</div>
       <div class="grid">
-        <input type="number" id="tde1" placeholder="TDE 1" min="0" max="10" oninput="validarInput(this)">
-        <input type="number" id="tde2" placeholder="TDE 2" min="0" max="10" oninput="validarInput(this)">
-        <input type="number" id="tde3" placeholder="TDE 3" min="0" max="10" oninput="validarInput(this)">
-        <input type="number" id="tde4" placeholder="TDE 4" min="0" max="10" oninput="validarInput(this)">
+        <input type="number" id="tde1" placeholder="TDE 1" min="0" max="10" oninput="validarInput(this); verificarBotaoAVP2()">
+        <input type="number" id="tde2" placeholder="TDE 2" min="0" max="10" oninput="validarInput(this); verificarBotaoAVP2()">
+        <input type="number" id="tde3" placeholder="TDE 3" min="0" max="10" oninput="validarInput(this); verificarBotaoAVP2()">
+        <input type="number" id="tde4" placeholder="TDE 4" min="0" max="10" oninput="validarInput(this); verificarBotaoAVP2()">
       </div>
     </div>
 
-    <button class="btn-calc" onclick="calcular()">CALCULAR MÉDIA</button>
+    <button class="btn-calc" onclick="calcular()"><i class="fas fa-calculator"></i> CALCULAR MÉDIA</button>
+
+    <button class="btn-avp2" id="btnSaberAVP2" onclick="saberNotaAVP2()">
+      <i class="fas fa-search"></i> QUANTO PRECISO TIRAR NA AVP2
+    </button>
 
     <p style="margin-top: 24px; font-size: 0.72rem; color: rgba(255,255,255,0.3); letter-spacing: 0.5px;">
       Desenvolvido por <a href="https://theonatan.vercel.app" target="_blank" style="color: #E30613; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer;">Theo Natan</a>
     </p>
   </div>
 
-  <!-- Modal resultado -->
+  <!-- Modal resultado normal -->
   <div class="modal-overlay" id="overlay" onclick="fecharModal()">
     <div class="modal-content" onclick="event.stopPropagation()">
       <div id="modal-icon"></div>
       <span style="font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase;">Média Final</span>
       <div class="res-media" id="modal-nota">0.0</div>
       <span class="status-badge" id="modal-status">Status</span>
-
       <div id="avp-necessaria" class="avf-info" style="display: none;">
         <p id="avf-text"></p>
       </div>
-
       <button class="btn-close" onclick="fecharModal()">VOLTAR</button>
+    </div>
+  </div>
+
+  <!-- Modal "Saber Nota AVP2" -->
+  <div class="modal-overlay" id="overlayAVP2" onclick="fecharModalAVP2()">
+    <div class="modal-avp2-content" onclick="event.stopPropagation()">
+      <div id="avp2-icon" class="avp2-header-icon"></div>
+      <span class="avp2-label">Nota mínima na AVP 2</span>
+      <div class="avp2-nota" id="avp2-nota-min">—</div>
+      <div class="avp2-sublabel" id="avp2-sublabel"></div>
+      <div id="avp2-cenarios"></div>
+      <button class="btn-avp2-close" onclick="fecharModalAVP2()">ENTENDIDO</button>
     </div>
   </div>
 
@@ -334,6 +485,34 @@
       }
     }
 
+    // Mostra o botão "SABER NOTA AVP2" quando AVP1 está preenchida (TDEs são opcionais)
+    function verificarBotaoAVP2() {
+      const avp1Val = document.getElementById('avp1').value;
+      const btn = document.getElementById('btnSaberAVP2');
+      const avp1 = parseFloat(avp1Val);
+      const avp1Valida = avp1Val !== '' && !isNaN(avp1) && avp1 >= 0 && avp1 <= 10;
+
+      if (avp1Valida) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    }
+
+    // Calcula a soma ponderada dos TDEs
+    function calcularTDE() {
+      const getV = (id) => parseFloat(document.getElementById(id).value) || 0;
+      const tdes = [getV('tde1'), getV('tde2'), getV('tde3'), getV('tde4')];
+      let somaTDE = 0;
+      tdes.forEach(n => somaTDE += (n / 10) * 0.5);
+      return somaTDE;
+    }
+
+    // Arredonda para o 0.5 mais próximo (ex: 4.2 → 4.0, 4.3 → 4.5, 4.7 → 4.5, 4.8 → 5.0)
+    function arredondar(media) {
+      return Math.round(media * 2) / 2;
+    }
+
     function calcular() {
       const ids = ['avp1', 'avp2', 'tde1', 'tde2', 'tde3', 'tde4'];
       let temErro = false;
@@ -355,17 +534,152 @@
       const getV = (id) => parseFloat(document.getElementById(id).value) || 0;
       const n1 = getV('avp1');
       const n2 = getV('avp2');
-      const tdes = [getV('tde1'), getV('tde2'), getV('tde3'), getV('tde4')];
-
-      let somaTDE = 0;
-      tdes.forEach(n => somaTDE += (n / 10) * 0.5);
+      const somaTDE = calcularTDE();
 
       let media = (n1 * 0.4) + (n2 * 0.4) + somaTDE;
-
-      // Arredondamento principal (Theo Natan): >= 0.8 sobe pro inteiro
-      if (media % 1 >= 0.799) media = Math.ceil(media);
+      media = arredondar(media);
 
       mostrarResultado(media);
+    }
+
+    function saberNotaAVP2() {
+      // Validar campos preenchidos (AVP1 + TDEs) — AVP2 é ignorada
+      const ids = ['avp1', 'tde1', 'tde2', 'tde3', 'tde4'];
+      let temErro = false;
+
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        const val = parseFloat(el.value);
+        if (el.value !== '' && (isNaN(val) || val < 0 || val > 10)) {
+          el.classList.add('input-error');
+          temErro = true;
+        }
+      });
+
+      if (temErro) {
+        document.getElementById('overlayErro').style.display = 'flex';
+        return;
+      }
+
+      const avp1 = parseFloat(document.getElementById('avp1').value) || 0;
+      const somaTDE = calcularTDE();
+
+      // Parcela fixa já garantida: AVP1 * 0.4 + TDEs
+      const parcelaFixa = (avp1 * 0.4) + somaTDE;
+
+      // Para passar DIRETO: media >= 7
+      // media = parcelaFixa + avp2 * 0.4  >= 7
+      // avp2 >= (7 - parcelaFixa) / 0.4
+      const avp2NecessariaDireto = (7 - parcelaFixa) / 0.4;
+
+      const iconDiv = document.getElementById('avp2-icon');
+      const notaDiv = document.getElementById('avp2-nota-min');
+      const sublabelDiv = document.getElementById('avp2-sublabel');
+      const cenariosDiv = document.getElementById('avp2-cenarios');
+
+      cenariosDiv.innerHTML = '';
+
+      if (avp2NecessariaDireto <= 0) {
+        // Já passa direto com qualquer nota na AVP2 (inclusive 0)
+        iconDiv.innerHTML = '<i class="fas fa-check-circle" style="color:#10b981;"></i>';
+        notaDiv.style.color = '#059669';
+        notaDiv.innerText = '0.0';
+        sublabelDiv.innerText = 'para aprovação direta';
+        sublabelDiv.style.color = '#059669';
+
+        cenariosDiv.innerHTML = `
+          <div class="cenario-box aprovado">
+            <i class="fas fa-check-circle"></i>
+            <span>Você já está aprovado direto mesmo com 0 na AVP2! 🎉</span>
+          </div>
+        `;
+
+      } else if (avp2NecessariaDireto > 10) {
+        // Impossível passar direto — calcular o que acontece com AVP2 = 10
+        const mediaMax = arredondar(parcelaFixa + 10 * 0.4);
+
+        iconDiv.innerHTML = '<i class="fas fa-times-circle" style="color:#ef4444;"></i>';
+        notaDiv.style.color = '#dc2626';
+        notaDiv.innerText = '10+';
+        sublabelDiv.innerText = 'necessário para aprovação direta (impossível)';
+        sublabelDiv.style.color = '#dc2626';
+
+        if (mediaMax >= 4) {
+          // Com 10 na AVP2 vai pra AVF
+          let necessariaAVF = 10 - mediaMax;
+          let necessariaAVFArr = Math.ceil(necessariaAVF * 2) / 2;
+
+          cenariosDiv.innerHTML = `
+            <div class="impossivel-box">
+              <i class="fas fa-info-circle"></i>
+              Não é possível passar direto com nenhuma nota na AVP2.
+            </div>
+            <div class="cenario-box avf" style="margin-top:10px;">
+              <i class="fas fa-exclamation-circle"></i>
+              <span>Com <b>10.0</b> na AVP2, sua média seria <b>${mediaMax.toFixed(1)}</b> → Vai para <b>AVF</b> (precisa de mín. <b>${necessariaAVFArr.toFixed(1)}</b>)</span>
+            </div>
+          `;
+        } else {
+          cenariosDiv.innerHTML = `
+            <div class="impossivel-box">
+              <i class="fas fa-info-circle"></i>
+              Não é possível atingir média suficiente. Mesmo com 10 na AVP2, a média seria <b>${mediaMax.toFixed(1)}</b> → Reprovado Direto.
+            </div>
+          `;
+        }
+
+      } else {
+        // Começa do piso em passos de 0.5 e sobe só se necessário
+        // Ex: nota exata = 4.0 → testa 4.0 primeiro; exata = 4.1 → testa 4.0, se não bater vai pra 4.5
+        let notaMinima = Math.floor(avp2NecessariaDireto * 2) / 2;
+        if (notaMinima < 0) notaMinima = 0;
+
+        let mediaComMin = arredondar(parcelaFixa + notaMinima * 0.4);
+        while (mediaComMin < 7 && notaMinima <= 10) {
+          notaMinima = notaMinima + 0.5;
+          mediaComMin = arredondar(parcelaFixa + notaMinima * 0.4);
+        }
+        if (notaMinima > 10) notaMinima = 10;
+
+        iconDiv.innerHTML = '<i class="fas fa-bullseye" style="color:#f59e0b;"></i>';
+        notaDiv.style.color = '#d97706';
+        notaDiv.innerText = notaMinima.toFixed(1);
+        sublabelDiv.innerText = 'para aprovação direta (média ≥ 7.0)';
+        sublabelDiv.style.color = '#64748b';
+
+        // Cenário: e se tirar abaixo da mínima?
+        const notaAbaixo = Math.max(0, notaMinima - 1);
+        const mediaAbaixo = arredondar(parcelaFixa + notaAbaixo * 0.4);
+
+        let cenariosHTML = `
+          <div class="cenario-box aprovado">
+            <i class="fas fa-check-circle"></i>
+            <span>Com <b>${notaMinima.toFixed(1)}</b> ou mais na AVP2 → Aprovado Direto ✅</span>
+          </div>
+        `;
+
+        if (mediaAbaixo >= 4) {
+          let necessariaAVF = 10 - mediaAbaixo;
+          let necessariaAVFArr = Math.ceil(necessariaAVF * 2) / 2;
+          cenariosHTML += `
+            <div class="cenario-box avf">
+              <i class="fas fa-exclamation-circle"></i>
+              <span>Com menos → Avaliação Final (AVF), precisando de mín. <b>${necessariaAVFArr.toFixed(1)}</b></span>
+            </div>
+          `;
+        } else {
+          cenariosHTML += `
+            <div class="cenario-box reprovado">
+              <i class="fas fa-times-circle"></i>
+              <span>Com menos → Risco de <b>Reprovação Direta</b></span>
+            </div>
+          `;
+        }
+
+        cenariosDiv.innerHTML = cenariosHTML;
+      }
+
+      document.getElementById('overlayAVP2').style.display = 'flex';
     }
 
     function mostrarResultado(media) {
@@ -402,13 +716,9 @@
       overlay.style.display = 'flex';
     }
 
-    function fecharModal() {
-      document.getElementById('overlay').style.display = 'none';
-    }
-
-    function fecharModalErro() {
-      document.getElementById('overlayErro').style.display = 'none';
-    }
+    function fecharModal() { document.getElementById('overlay').style.display = 'none'; }
+    function fecharModalAVP2() { document.getElementById('overlayAVP2').style.display = 'none'; }
+    function fecharModalErro() { document.getElementById('overlayErro').style.display = 'none'; }
   </script>
 </body>
 
